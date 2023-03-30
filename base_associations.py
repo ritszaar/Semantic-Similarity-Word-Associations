@@ -48,6 +48,7 @@ class CIFARData:
         # Load the CIFAR 100 dataset
         print("\nLoading the CIFAR 100 dataset...")
         dataset = datasets.load_dataset('cifar100')
+        print("\nSuccessfully loaded the CIFAR 100 dataset.\n")
 
         # Get the fine labels and store the mappings from fine_label to id and vice versa
         fine_labels = dataset["train"].features["fine_label"].names
@@ -91,6 +92,6 @@ with open(savepath, "w") as f:
             print('"{}" {:.6f}'.format(prediction[0], prediction[1]), file=f) 
 
         if ((i + 1) % 10 == 0):
-            print("\nComputed base associations ({}/{})\n".format(i + 1, 1000))   
+            print("\nComputed base associations ({}/{}).\n".format(i + 1, 1000))   
 
-print("\n\nSuccessfully computed base associations for {}-{}...\n".format(start_index, start_index + 1000 - 1))
+print("\n\nSuccessfully computed base associations for {}-{}.\n".format(start_index, start_index + 1000 - 1))
