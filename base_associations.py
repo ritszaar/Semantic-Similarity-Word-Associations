@@ -90,7 +90,7 @@ with open(savepath, "w") as f:
         for prediction in predictions:
             print('"{}" {:.6f}'.format(prediction[0], prediction[1]), file=f) 
 
-        if ((i + 1) % 100 == 0):
+        if ((i + 1) % 10 == 0):
             print("\nComputed base associations ({}/{})\n".format(i + 1, 1000))   
 
 print("\n\nSuccessfully computed base associations for {}-{}...\n".format(start_index, start_index + 1000 - 1))
