@@ -5,6 +5,7 @@ import sys
 import cv2
 import PIL
 import datasets
+import datetime
 import numpy as np
 
 import tensorflow as tf
@@ -77,10 +78,12 @@ class CIFARData:
     def get_fine_label_by_index(self, index):
         return self.id2fine_label[self.dataset[index]["fine_label"]]
     
+start_time = datetime.datetime.now()
 cifar_data = CIFARData()
 start_index = int(sys.argv[1])
 savepath = "./Base Associations/{}-{}.txt".format(start_index, start_index + 1000 - 1)
-print("\nComputing base associations for {}-{}...\n".format(start_index, start_index + 1000 - 1))
+logpath  = "./Base Associations/timing.log"
+print("\nComputing base associations for {:>6}-{:<6}...\n".format(start_index, start_index + 1000 - 1))
 with open(savepath, "w") as f:
     for i in range(1000):
         index = start_index + i
@@ -94,4 +97,10 @@ with open(savepath, "w") as f:
         if ((i + 1) % 10 == 0):
             print("\nComputed base associations ({}/{}).\n".format(i + 1, 1000))   
 
-print("\n\nSuccessfully computed base associations for {}-{}.\n".format(start_index, start_index + 1000 - 1))
+end_time = datetime.datetime.now()
+time_elapsed = (end_time - start_time).total_seconds()
+print("Successfully computed base associations for {:>6}-{:<6} in {:.2f} seconds.\n".format(start_index, start_index + 1000 - 1, time_elapsed))
+
+with open(logpath, "a") as f:
+    print("Successfully computed base associations for {:>6}-{:<6} in {:.2f} seconds.".format(start_index, start_index + 1000 - 1, time_elapsed), file=f)
+
