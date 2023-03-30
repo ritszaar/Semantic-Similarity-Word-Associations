@@ -83,7 +83,7 @@ cifar_data = CIFARData()
 start_index = int(sys.argv[1])
 savepath = "./Base Associations/{}-{}.txt".format(start_index, start_index + 1000 - 1)
 logpath  = "./Base Associations/timing.log"
-print("\nComputing base associations for {:>6}-{:<6}...\n".format(start_index, start_index + 1000 - 1))
+print("\nComputing base associations for {}-{}...\n".format(start_index, start_index + 1000 - 1))
 with open(savepath, "w") as f:
     for i in range(1000):
         index = start_index + i
