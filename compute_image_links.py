@@ -22,7 +22,7 @@ def get_image_links(word2id):
                 id = int(line.split(" ")[0])
                 fine_label_id = word2id[re.findall('"([^"]*)"', line)[0]]
                 image_links.append([])
-                image_links[id].append((fine_label_id, 1.00))
+                image_links[id].append((fine_label_id, 0.75))
                 for i in range(10):
                     if i < topIWK:
                         line = f.readline()

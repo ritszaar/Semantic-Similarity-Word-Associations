@@ -1,110 +1,96 @@
-import re
-import psycopg2
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-topIWK = 4
-topWWK = 4
+import pickle
+import queue
+import numpy as np
 
-def connect():
-    print("Connecting to PostgreSQL database...")
-    try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="word_associations",
-            user="miranda",
-            password="1234")
-        return conn
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-def get_base_words():
-    base_words = set()
-    for i in range(0, 50000, 1000):
-        with open("./Base Associations/{}-{}.txt".format(i, i + 1000 - 1), "r") as f:
-            for i in range(0, 11000, 11):
-                fine_label = re.findall('"([^"]*)"', f.readline())[0]
-                base_words.add(fine_label)
-                for i in range(10):
-                    if i < topIWK:
-                        pred_label = re.findall('"([^"]*)"', f.readline())[0]
-                        base_words.add(pred_label)
-                    else:
-                        f.readline()
-    return sorted(base_words)
+def db_format(label):
+    return label.replace('_', ' ').upper()
 
-def get_all_words(conn):
-    print("Getting all the words for the WAN...")
-    all_words = set()
-    base_words = get_base_words()
-    for base_word in base_words:
-        all_words.add(base_word)
-        cue = base_word.split(" ")[-1].replace("'", "''")
-        cursor = conn.cursor()
-        cursor.execute("SELECT target, strength FROM usf_word_associations WHERE cue='{}'".format(cue))
-        rows = cursor.fetchall()
-        derived_words_count = min(len(rows) if rows is not None else 0, topWWK)
-        for i in range(derived_words_count):
-            all_words.add(rows[i][0])
-        cursor.close()
-    all_words = sorted(all_words)
-    word2id, id2word = dict(), dict()
-    with open("./Words/all_words.txt", "w") as f:
-        print("{} words".format(len(all_words)), file=f)
-        for i in range(len(all_words)):
-            word2id[all_words[i]] = i
-            id2word[i] = all_words[i]
-            print('{} "{}"'.format(i, all_words[i]), file=f)
-    print("Successfully obtained all the words for the WAN. {} words found.".format(len(all_words)))
-    print("Words saved in ./Words/all_words.txt.\n")
-    return all_words, word2id, id2word
+class WordAssociationsNetwork:
+    def __init__(self):
+        with open("words.pickle", "rb") as f:
+            data = pickle.load(f)
+            self.all_words = data["all_words"]
+            self.word2id   = data["word2id"]
+            self.id2word   = data["id2word"]
+        
+        with open("image_links.pickle", "rb") as f:
+            data = pickle.load(f)
+            self.image_links = data["image_links"]  
 
-def get_image_links(word2id):
-    image_links = []
-    for i in range(0, 50000, 1000):
-        with open("./Base Associations/{}-{}.txt".format(i, i + 1000 - 1), "r") as f:
-            for i in range(0, 11000, 11):
-                line = f.readline()
-                id = int(line.split(" ")[0])
-                fine_label_id = word2id[re.findall('"([^"]*)"', line)[0]]
-                image_links.append([])
-                image_links[id].append((fine_label_id, 1.00))
-                for i in range(10):
-                    if i < topIWK:
-                        line = f.readline()
-                        strength = float(line.split(" ")[-1])
-                        pred_label_id = word2id[re.findall('"([^"]*)"', line)[0]]
-                        image_links[id].append((pred_label_id, strength))
-                    else:
-                        f.readline()
-    return image_links
+        with open("word_links.pickle", "rb") as f:
+            data = pickle.load(f)
+            self.word_links = data["word_links"]
 
-def get_word_links(conn, all_words, word2id):
-    word_links = [[-1] * len(all_words) for i in range(len(all_words))] 
-    count = 0
-    total_count = len(all_words) ** 2   
-    for i in range(len(all_words)):
-        for j in range(len(all_words)):
-            cue = all_words[i].split(" ")[-1].replace("'", "''")
-            target = all_words[j].split(" ")[-1].replace("'", "''")
-            cursor = conn.cursor()
-            cursor.execute("SELECT strength FROM usf_word_associations WHERE cue='{}' AND target='{}'".format(cue, target))
-            row = cursor.fetchone()
-            if row is not None:
-                word_links[word2id[all_words[i]]][word2id[all_words[j]]] = float(row[0])
-                print("Cue: {}, Target: {}".format(all_words[i], all_words[j]))
-            cursor.close() 
-            count = count + 1
-            if count % 1000 == 0:
-                print("Found word strengths ({}/{})".format(count, total_count))
-    return word_links
+        self.n_images = len(self.image_links)
+        self.n_words = len(self.all_words)
+        self.n = self.n_images + self.n_words
+        self.g = [[] for i in range(self.n)]
 
-print()
-conn = connect()
-if conn is not None:
-    print("Successfully connected to PostgreSQL database.\n")
-    all_words, word2id, id2word = get_all_words(conn)
-    image_links = get_image_links(word2id)
-    word_links = get_word_links(conn, all_words, word2id)
-    for i in range(len(all_words)):
-        for j in range(len(all_words)):
-            if word_links[i][j] != -1:
-                print("Cue: {}, Target: {}".format(id2word[i], id2word[j]))
+        # Image Links
+        for i in range(self.n_images):
+            for j in range(len(self.image_links[i])):
+                u = i
+                v = int(self.image_links[i][j][0] + self.n_images)
+                if self.image_links[i][j][1] != 0:
+                    w = 1.00 / self.image_links[i][j][1]
+                    self.g[u].append((v, w))
+                    self.g[v].append((u, w))
+
+        # Word Links
+        for i in range(len(self.all_words)):
+            for j in range(i, len(self.all_words)):
+                u = i + self.n_images
+                v = j + self.n_images
+                winv = max(self.word_links[i][j], self.word_links[j][i])
+                if winv != -1:
+                    w = 1.00/winv
+                    self.g[u].append((v, w))
+                    self.g[v].append((u, w))
+
+    def isEtherealNode(self, u):
+        return u == -1
+
+    def isImageNode(self, u):
+        return u >= 0 and u < self.n_images; 
+
+    def isWordNode(self, u):
+        return u >= self.n_images and u < self.n 
+    
+    def dijkstra(self, sc, topK):
+        vis  = [False for i in range(self.n + 1)]
+        par = [-1 for i in range(self.n + 1)]
+        dist = [1e9 for i in range(self.n + 1)]
+        imgdist = [1e9 for i in range(self.n_images)]
+
+        dist[sc] = 0
+        imgdist[sc] = 0
+        pq = queue.PriorityQueue()
+        pq.put((dist[sc], sc))
+
+        while not pq.empty():
+            u = pq.get()[1]
+            vis[u] = True
+            if self.isImageNode(u) and u != sc:
+                imgdist[u] = min(imgdist[u], dist[u])
+                continue
+            for (v, w) in self.g[u]:
+                if not vis[v]:
+                    if dist[v] > dist[u] + w:
+                        par[v] = u
+                        dist[v] = dist[u] + w
+                        pq.put((dist[v], v))
+
+        ans = sorted(
+                range(len(imgdist)),
+                key = lambda index: imgdist[index]
+        )[1:(topK + 1)]
+        return ans
+
+model = WordAssociationsNetwork()      
+print(model.dijkstra(218, 4))
