@@ -93,7 +93,7 @@ class CIFARData:
     def get_fine_label_by_index(self, index):
         return self.id2fine_label[self.dataset[index]["fine_label"]]
     
-def get_new_words(all_words, base_new_words):
+def get_new_words(conn, all_words, base_new_words):
     all_new_words = set()
     for base_new_word in base_new_words:
         all_new_words.add(base_new_word)
