@@ -186,11 +186,19 @@ class WordAssociationsNetwork:
                         dist[v] = dist[u] + w
                         pq.put((dist[v], v))
 
-        ans = sorted(
-                range(len(imgdist)),
-                key = lambda index: imgdist[index]
-        )[1:(topK + 1)]
-        return ans
+        predictions = sorted(range(len(imgdist)), key = lambda index: imgdist[index])[1:(topK + 1)]
+
+        paths = []
+        for prediction in predictions:
+            u = par[prediction]
+            path = []
+            while u != 0:
+                path.append(self.id2word[u - self.n_images - 1])
+                u = par[u]
+            path.reverse()
+            paths.append(path)
+
+        return [x - 1 for x in predictions], paths
     
     def predict(self, img, topK):
         image_link = get_predictions(resize_image_for_resnet(img))
@@ -228,10 +236,17 @@ test_data  = CIFARData("test")
 
 model = WordAssociationsNetwork()
 index = random.randrange(len(test_data.dataset))
-predictions = [x - 1 for x in model.predict(test_data.dataset[index]["img"], 4)]
+predictions, paths = model.predict(test_data.dataset[index]["img"], 4)
 
 print("\nRandomly chosen test image index: {}\n".format(index))
 print("Predictions: {}".format(predictions))
+
+print("\nPaths: \n")
+for i in range(len(predictions)):
+    print("Query-{}: Query --> ".format(predictions[i]), end='')
+    for j in range(len(paths[i])):
+        print("{} --> ".format(paths[i][j]), end='')
+    print(predictions[i])
 
 # create figure
 fig = plt.figure(figsize=(10, 10))
