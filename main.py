@@ -186,7 +186,16 @@ class WordAssociationsNetwork:
                         dist[v] = dist[u] + w
                         pq.put((dist[v], v))
 
-        predictions = sorted(range(len(imgdist)), key = lambda index: imgdist[index])[1:(topK + 1)]
+        predictions = []
+        for u in range(1, self.n_images + 1):
+            if imgdist[u] < 1e9:
+                predictions.append((imgdist[u], u))
+        predictions.sort()
+        predictions = [x[1] for x in predictions]
+        # predictions = sorted(range(len(imgdist)), key = lambda index: imgdist[index])
+        print(len(predictions))
+        # predictions.reverse()
+        predictions = predictions[0:topK]
 
         paths = []
         for prediction in predictions:
@@ -234,9 +243,10 @@ class WordAssociationsNetwork:
 train_data = CIFARData("train")
 test_data  = CIFARData("test")
 
+topK = 20
 model = WordAssociationsNetwork()
 index = random.randrange(len(test_data.dataset))
-predictions, paths = model.predict(test_data.dataset[index]["img"], 4)
+predictions, paths = model.predict(test_data.dataset[index]["img"], topK)
 
 print("\nRandomly chosen test image index: {}\n".format(index))
 print("Predictions: {}".format(predictions))
@@ -252,8 +262,8 @@ for i in range(len(predictions)):
 fig = plt.figure(figsize=(10, 10))
   
 # setting values to rows and column variables
-rows = 3
-columns = 2
+rows = int(topK/4) + 1
+columns = 4
   
 # Adds a subplot at the 1st position
 fig.add_subplot(rows, columns, 1)
@@ -263,36 +273,12 @@ plt.imshow(test_data.dataset[index]["img"])
 plt.axis('off')
 plt.title(test_data.id2fine_label[test_data.dataset[index]["fine_label"]])
   
-# Adds a subplot at the 2nd position
-fig.add_subplot(rows, columns, 3)
+for i in range(topK):
+    fig.add_subplot(rows, columns, i + columns)
   
-# showing image
-plt.imshow(train_data.dataset[predictions[0]]["img"])
-plt.axis('off')
-plt.title(train_data.id2fine_label[train_data.dataset[predictions[0]]["fine_label"]])
+    plt.imshow(train_data.dataset[predictions[i]]["img"])
+    plt.axis('off')
+    plt.title(train_data.id2fine_label[train_data.dataset[predictions[i]]["fine_label"]])
   
-# Adds a subplot at the 3rd position
-fig.add_subplot(rows, columns, 4)
-  
-# showing image
-plt.imshow(train_data.dataset[predictions[1]]["img"])
-plt.axis('off')
-plt.title(train_data.id2fine_label[train_data.dataset[predictions[1]]["fine_label"]])
-  
-# Adds a subplot at the 4th position
-fig.add_subplot(rows, columns, 5)
-  
-# showing image
-plt.imshow(train_data.dataset[predictions[2]]["img"])
-plt.axis('off')
-plt.title(train_data.id2fine_label[train_data.dataset[predictions[2]]["fine_label"]])
-
-# Adds a subplot at the 4th position
-fig.add_subplot(rows, columns, 6)
-  
-# showing image
-plt.imshow(train_data.dataset[predictions[3]]["img"])
-plt.axis('off')
-plt.title(train_data.id2fine_label[train_data.dataset[predictions[3]]["fine_label"]])
 
 plt.show()
