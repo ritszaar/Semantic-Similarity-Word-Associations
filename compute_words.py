@@ -54,7 +54,7 @@ def get_all_words(conn):
             word2id[all_words[i]] = i
             id2word[i] = all_words[i]
             print('{} "{}"'.format(i, all_words[i]), file=f)
-    print("Successfully obtained all the words for the WAN. {} words found.".format(len(all_words)))
+    print("Successfully obtained all the words for the WAN. {} words found. Words saved in ./Words/all_words.txt.".format(len(all_words)))
     return all_words, word2id, id2word
 
 print()
