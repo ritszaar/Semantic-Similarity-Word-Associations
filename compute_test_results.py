@@ -307,12 +307,13 @@ print("\nComputing test results...\n")
 for i in range(len(test_data.dataset)):
     predictions, paths, preprocessing_time, total_query_time = model.predict(test_data.dataset[i]["img"], topK)
     test_results.append((predictions, paths, preprocessing_time, total_query_time))
-    if(i + 1) % 10 == 0:
-        print("\nComputed test results ({}/{}).\n".format(i + 1, 1000))   
+    if (i + 1) % 10 == 0:
+        print("\nComputed test results ({}/{}).\n".format(i + 1, 10000))   
 
-data = dict()
-data["test_results"] = test_results
-print('\nDumping data in "test_results.pickle"...')
-with open("test_results.pickle", "wb") as f:
-    pickle.dump(data, file=f)
-print('Successfully dumped data in "test_results.pickle".')
+    if (i + 1) % 1000 == 0:
+        data = dict()
+        data["test_results"] = test_results
+        print('Dumping data in "test_results.pickle"...')
+        with open("test_results.pickle", "wb") as f:
+            pickle.dump(data, file=f)
+            print('Successfully dumped data in "test_results.pickle" ({}/{}).\n\n'.format(i + 1, 10000))

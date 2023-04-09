@@ -7,4 +7,4 @@ data = dict()
 with open("test_results.pickle", "rb") as f:
     data = pickle.load(f)
 
-print(data["test_results"][0])
+print(len(data["test_results"]))
