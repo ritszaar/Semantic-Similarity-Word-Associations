@@ -4,11 +4,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import cv2
 import PIL
 import queue
-import random
+import pickle
 import bisect
 import pickle
 import datasets
 import psycopg2
+import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,6 +18,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 topIWK = 4
 topWWK = 4
+topK = 20
 
 def connect():
     print("Connecting to PostgreSQL database...")
@@ -108,6 +110,7 @@ def get_new_words(conn, all_words, base_new_words):
         cursor.close()
     all_new_words = sorted(all_new_words)
     return all_new_words
+
 class WordAssociationsNetwork:
     def __init__(self):
         with open("words.pickle", "rb") as f:
@@ -193,7 +196,7 @@ class WordAssociationsNetwork:
         predictions.sort()
         predictions = [x[1] for x in predictions]
         # predictions = sorted(range(len(imgdist)), key = lambda index: imgdist[index])
-        print(len(predictions))
+        # print(len(predictions))
         # predictions.reverse()
         predictions = predictions[0:topK]
 
@@ -210,25 +213,13 @@ class WordAssociationsNetwork:
         return [x - 1 for x in predictions], paths
     
     def predict(self, img, topK):
+        start_time = datetime.datetime.now()
         image_link = get_predictions(resize_image_for_resnet(img))
-
+        mid_time = datetime.datetime.now()
         base_new_words = set()
         for i in range(topIWK):
             if bisect.bisect_left(self.all_words, image_link[i][0]) == self.n_words:
                 base_new_words.add(image_link[i][0])
-        
-        if len(base_new_words) == 0:
-            print("All fine!\n")
-        else:
-            print("Oh boi!\n")
-            # all_new_words = get_new_words(base_new_words)
-            # for i in range(all_new_words):
-            #     id = len(self.all_words)
-            #     self.all_words.append(all_new_words[i])
-            #     self.id2word[id] = all_new_words[i]
-            #     self.word2id[all_new_words[i]] = id
-            # self.n_words = len(self.all_words)
-            # self.n = self.n_images + self.n_words
 
         for i in range(len(image_link)):
             u = 0
@@ -237,48 +228,91 @@ class WordAssociationsNetwork:
             self.g[u].append((v, w))
             self.g[v].append((u, w))
 
-        return model.dijkstra(0, topK)
-        
+        predictions, paths = model.dijkstra(0, topK)
+        end_time = datetime.datetime.now()
+        preprocessing_time = (mid_time - start_time).total_seconds()
+        total_query_time   = (end_time - start_time).total_seconds()
+
+        for i in range(len(image_link)):
+            u = 0
+            v = self.word2id[image_link[i][0]] + self.n_images + 1
+            self.g[u].pop()
+            self.g[v].pop()
+
+        return predictions, paths, preprocessing_time, total_query_time
+    
+    
+def show_predictions(train_data, test_data, index, predictions):
+    # create figure
+    fig = plt.figure(figsize=(10, 10))
+    
+    # setting values to rows and column variables
+    rows = int(topK/4) + 1
+    columns = 4
+    
+    # Adds a subplot at the 1st position
+    fig.add_subplot(rows, columns, 1)
+    
+    # showing image
+    plt.imshow(test_data.dataset[index]["img"])
+    plt.axis('off')
+    plt.title(test_data.id2fine_label[test_data.dataset[index]["fine_label"]])
+    
+    for i in range(topK):
+        fig.add_subplot(rows, columns, i + columns + 1)
+    
+        plt.imshow(train_data.dataset[predictions[i]]["img"])
+        plt.axis('off')
+        plt.title(train_data.id2fine_label[train_data.dataset[predictions[i]]["fine_label"]])
+
+    plt.show()
+
+def evaluate_predictions(train_data, test_data, index, predictions):
+    precisions = []
+    target_fine_label = test_data.id2fine_label[test_data.dataset[index]["fine_label"]]
+    target_coarse_label = test_data.id2coarse_label[test_data.dataset[index]["coarse_label"]]
+    print("Test Image Labels: ")
+    print(target_fine_label, target_coarse_label)
+
+    print("Predicted Image Labels: ")
+    for i in range(topK):
+        pred_fine_label = train_data.id2fine_label[train_data.dataset[predictions[i]]["fine_label"]]
+        pred_coarse_label = train_data.id2coarse_label[train_data.dataset[predictions[i]]["coarse_label"]]
+        print(pred_fine_label, pred_coarse_label)
+        precisions.append(0)
+        if target_fine_label == pred_fine_label:
+            precisions[i] = 1
+        elif target_coarse_label == pred_coarse_label:
+            precisions[i] = 0.5
+
+    precision_at_5 = sum(precisions[0:5])/5
+    precision_at_10 = sum(precisions[0:10])/10
+    precision_at_15 = sum(precisions[0:15])/15
+    precision_at_20 = sum(precisions[0:20])/20
+    print("Predictions: {}\n".format(precisions))
+    print("Precision@5: {:.5f}, Precision@10: {:.5f}, Precision@15: {:.5f}, Precision@20: {:.5f}".format(precision_at_5, precision_at_10, precision_at_15, precision_at_20))
+
 
 train_data = CIFARData("train")
 test_data  = CIFARData("test")
 
-topK = 20
 model = WordAssociationsNetwork()
-index = random.randrange(len(test_data.dataset))
-predictions, paths = model.predict(test_data.dataset[index]["img"], topK)
 
-print("\nRandomly chosen test image index: {}\n".format(index))
-print("Predictions: {}".format(predictions))
+test_results = []
 
-print("\nPaths: \n")
-for i in range(len(predictions)):
-    print("Query-{}: Query --> ".format(predictions[i]), end='')
-    for j in range(len(paths[i])):
-        print("{} --> ".format(paths[i][j]), end='')
-    print(predictions[i])
+model.predict(test_data.dataset[0]["img"], topK)
 
-# create figure
-fig = plt.figure(figsize=(10, 10))
-  
-# setting values to rows and column variables
-rows = int(topK/4) + 1
-columns = 4
-  
-# Adds a subplot at the 1st position
-fig.add_subplot(rows, columns, 1)
-  
-# showing image
-plt.imshow(test_data.dataset[index]["img"])
-plt.axis('off')
-plt.title(test_data.id2fine_label[test_data.dataset[index]["fine_label"]])
-  
-for i in range(topK):
-    fig.add_subplot(rows, columns, i + columns + 1)
-  
-    plt.imshow(train_data.dataset[predictions[i]]["img"])
-    plt.axis('off')
-    plt.title(train_data.id2fine_label[train_data.dataset[predictions[i]]["fine_label"]])
-  
+print("\nComputing test results...\n")
 
-plt.show()
+for i in range(len(test_data.dataset)):
+    predictions, paths, preprocessing_time, total_query_time = model.predict(test_data.dataset[i]["img"], topK)
+    test_results.append((predictions, paths, preprocessing_time, total_query_time))
+    if(i + 1) % 10 == 0:
+        print("\nComputed test results ({}/{}).\n".format(i + 1, 1000))   
+
+data = dict()
+data["test_results"] = test_results
+print('\nDumping data in "test_results.pickle"...')
+with open("test_results.pickle", "wb") as f:
+    pickle.dump(data, file=f)
+print('Successfully dumped data in "test_results.pickle".')
