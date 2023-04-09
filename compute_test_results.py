@@ -223,10 +223,11 @@ class WordAssociationsNetwork:
 
         for i in range(len(image_link)):
             u = 0
-            v = self.word2id[image_link[i][0]] + self.n_images + 1
-            w = 1.00 / float(image_link[i][1])
-            self.g[u].append((v, w))
-            self.g[v].append((u, w))
+            if image_link[i][0] in self.word2id:
+                v = self.word2id[image_link[i][0]] + self.n_images + 1
+                w = 1.00 / float(image_link[i][1])
+                self.g[u].append((v, w))
+                self.g[v].append((u, w))
 
         predictions, paths = model.dijkstra(0, topK)
         end_time = datetime.datetime.now()
@@ -235,9 +236,10 @@ class WordAssociationsNetwork:
 
         for i in range(len(image_link)):
             u = 0
-            v = self.word2id[image_link[i][0]] + self.n_images + 1
-            self.g[u].pop()
-            self.g[v].pop()
+            if image_link[i][0] in self.word2id:
+                v = self.word2id[image_link[i][0]] + self.n_images + 1
+                self.g[u].pop()
+                self.g[v].pop()
 
         return predictions, paths, preprocessing_time, total_query_time
     

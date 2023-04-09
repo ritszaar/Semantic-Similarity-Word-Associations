@@ -230,12 +230,13 @@ class WordAssociationsNetwork:
             # self.n_words = len(self.all_words)
             # self.n = self.n_images + self.n_words
 
-        for i in range(len(image_link)):
-            u = 0
-            v = self.word2id[image_link[i][0]] + self.n_images + 1
-            w = 1.00 / float(image_link[i][1])
-            self.g[u].append((v, w))
-            self.g[v].append((u, w))
+        # for i in range(len(image_link)):
+        #     u = 0
+        #     if image_link[i][0] in self.word2id:
+        #         v = self.word2id[image_link[i][0]] + self.n_images + 1
+        #         w = 1.00 / float(image_link[i][1])
+        #         self.g[u].append((v, w))
+        #         self.g[v].append((u, w))
 
         return model.dijkstra(0, topK)
         
@@ -245,7 +246,7 @@ test_data  = CIFARData("test")
 
 topK = 20
 model = WordAssociationsNetwork()
-index = random.randrange(len(test_data.dataset))
+index = 276
 predictions, paths = model.predict(test_data.dataset[index]["img"], topK)
 
 print("\nRandomly chosen test image index: {}\n".format(index))
