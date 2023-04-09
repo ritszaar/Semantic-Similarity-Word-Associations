@@ -98,14 +98,3 @@ import datasets
 
 # evaluate_predictions(train_data, test_data, test_results)
 
-data = dict()
-image_links, id2word = None, None
-with open("image_links.pickle", "rb") as f:
-    data = pickle.load(f)
-    image_links = data["image_links"]
-
-with open("words.pickle", "rb") as f:
-    data = pickle.load(f)
-    id2word = data["id2word"]
-
-print([id2word[x[0]] for x in image_links[0]])
