@@ -3,14 +3,14 @@
 This repository contains the implementation of semantical similarity between images based a word assications network as described in the following paper:
 
 > [**Semantic Similarity Between Images: A Novel Approach Based on a Complex Network of Free Word Associations**][1]  
-> Enrico Palumbo - Physics University of Torino, via Giuria, 1, 10025 Torino, Italy [enrico.palumbo@edu.unito.it](mailto:enrico.palumbo@edu.unito.it).
-> Walter Allasia - EURIX, via Carcano, 26, 10153 Torino, Italy [allasia@eurix.it](mailto:allasia@eurix.it).
+> Enrico Palumbo - Physics University of Torino, via Giuria, 1, 10025 Torino, Italy [enrico.palumbo@edu.unito.it](mailto:enrico.palumbo@edu.unito.it)<br>
+> Walter Allasia - EURIX, via Carcano, 26, 10153 Torino, Italy [allasia@eurix.it](mailto:allasia@eurix.it)<br>
 
 The data for word assocations is taken from the follwing site:
 
 > [**University of South Florida Free Association Norms**][2]  
-> Douglas L. Nelson and Cathy L. McEvoy - University of South Florida.
-> Thomas A. Schreiber - University of Kansas.
+> Douglas L. Nelson and Cathy L. McEvoy - University of South Florida<br>
+> Thomas A. Schreiber - University of Kansas<br>
 
 If you use this code, please cite the above resources.
 
