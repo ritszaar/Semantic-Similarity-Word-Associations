@@ -26,7 +26,7 @@ For computing the test results for all 10000 test images in the CIFAR-100 datase
 
 Note that with preprocessing overhead, total query time on average is 2.5s so total runtime of for this may go upto 8 hours.
 ### 1.2. Partial Test Results
-For computing the test results for all 10000 test images in the CIFAR-100 dataset, use:
+For computing the test results for a given number of test images in the CIFAR-100 dataset, use:
 ```
     python ./compute_partial_test_results.py  <number of images to be tested>
     python ./compute_retrieval_performance.py --partial
@@ -80,24 +80,23 @@ The retrieval performance of the model is evaluted.
 
 | Metric                      |  Value  | 
 | --------------------------- | ------- | 
-| Query Time with No Overhead | 0.4s    |
-| Query Time with Overhead    | 2.4s    | 
-| Precision@5                 | 49%     |
-| Precision@10                | 49%     |
-| Precision@15                | 49%     |
-| Precision@20                | 48%     |
+| Query Time with No Overhead | 0.46s   |
+| Query Time with Overhead    | 2.45s   | 
+| Precision@5                 | 48.96%  |
+| Precision@10                | 48.42%  |
+| Precision@15                | 48.75%  |
+| Precision@20                | 48.64%  |
 
 ### 3.2. All Test Images
 
 | Metric                      |  Value  | 
 | --------------------------- | ------- | 
-| Query Time with No Overhead | 0.4s    |
-| Query Time with Overhead    | 2.4s    | 
-| Precision@5                 | 49%     |
-| Precision@10                | 49%     |
-| Precision@15                | 49%     |
-| Precision@20                | 48%     |
+| Query Time with No Overhead | 0.51s   |
+| Query Time with Overhead    | 2.67s   | 
+| Precision@5                 | 49.14%  |
+| Precision@10                | 49.10%  |
+| Precision@15                | 48.77%  |
+| Precision@20                | 48.49%  |
 
 [1]: https://enricopal.github.io/publications/Semantic%20Similarity%20between%20Images.pdf
 [2]: http://w3.usf.edu/FreeAssociation/
-

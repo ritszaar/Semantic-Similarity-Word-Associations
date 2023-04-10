@@ -1,6 +1,7 @@
 import sys
 import pickle
 import datasets
+import prettytable
 
 class CIFARData:
     def __init__(self, which="train"):
@@ -76,12 +77,19 @@ def evaluate_predictions(train_data, test_data, test_results):
     avg_precision_at_20      /= n
     avg_preprocessing_time   /= n
     avg_total_retrieval_time /= n
-    print("Average Precision@5:          {:.2f}".format(avg_precision_at_5))
-    print("Average Precision@10:         {:.2f}".format(avg_precision_at_10))
-    print("Average Precision@15:         {:.2f}".format(avg_precision_at_15))
-    print("Average Precision@20:         {:.2f}".format(avg_precision_at_20))
-    print("Average Processing Time:      {:.2f}".format(avg_preprocessing_time))
-    print("Average Total Retrieval Time: {:.2f}".format(avg_total_retrieval_time))
+    stat = prettytable.PrettyTable()
+    stat.title = "\033[1m\033[92mOverall Retrieval Performance\033[0m"
+    stat.field_names = ["\033[93mMetric\033[0m", "\033[93mValue\033[0m"]
+    stat.add_row(["Average Retrieval Time Without Overhead", "{:.2f}s".format(avg_total_retrieval_time - avg_preprocessing_time)])
+    stat.add_row(["Average Retrieval Time With Overhead", "{:.2f}s".format(avg_total_retrieval_time)])
+    stat.add_row(["Average Precision@5",  "{:.2f}%".format(avg_precision_at_5  * 100)])
+    stat.add_row(["Average Precision@10", "{:.2f}%".format(avg_precision_at_10 * 100)])
+    stat.add_row(["Average Precision@15", "{:.2f}%".format(avg_precision_at_15 * 100)])
+    stat.add_row(["Average Precision@20", "{:.2f}%".format(avg_precision_at_20 * 100)])
+    stat.align["\033[93mMetric\033[0m"] = "l"
+    stat.align["\033[93mValue\033[0m"] = "l"
+    print()
+    print(stat, end='\n\n')
 
 pickle_path = "test_results.pickle"
 
