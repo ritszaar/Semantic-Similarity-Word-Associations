@@ -23,8 +23,6 @@ For computing the test results for all 10000 test images in the CIFAR-100 datase
     python ./compute_test_results.py
     python ./compute_retrieval_performance.py --all
 ```
-
-Note that with preprocessing overhead, total query time on average is 2.5s so total runtime of for this may go upto 8 hours.
 ### 1.2. Partial Test Results
 For computing the test results for a given number of test images in the CIFAR-100 dataset, use:
 ```
@@ -42,7 +40,7 @@ For an interactive demo, use:
 ### 2.1. Compute Image-Word Associations
 Every 32x32 image in the CIFAR-100 train dataset is cubic-interpolated to 224x224. The interpolated image is passed through the ResNet-50 model. The top 10 predictions of model along with its fine label and coarse label as provided by the dataset itself are saved in `Base Associations`.
 ```
-    python ./compute_base_associations.sh
+    bash ./compute_base_associations.sh
 ```
 
 ### 2.2. Compute Words
@@ -52,7 +50,7 @@ A PostgreSQL database is to be setup named `word_associations`. This database wi
 ```
 
 ### 2.3. Compute Image-Word Links
-The related topIWK words are to be saved as ids for each of the CIFAR-100 training images. Data generated is saved in `image_links.pickle`.
+The related `topIWK` words are to be saved as ids for each of the CIFAR-100 training images. Data generated is saved in `image_links.pickle`.
 ```
     python compute_image_links.py
 ```
