@@ -78,25 +78,25 @@ The retrieval performance of the model is evaluted.
 ## 3. Model Performance
 ### 3.1. 500 Test Images
 
-| Metric                      |  Value  | 
-| --------------------------- | ------- | 
-| Query Time with No Overhead | 0.46s   |
-| Query Time with Overhead    | 2.45s   | 
-| Precision@5                 | 48.96%  |
-| Precision@10                | 48.42%  |
-| Precision@15                | 48.75%  |
-| Precision@20                | 48.64%  |
+| Metric                                  |  Value  | 
+| --------------------------------------- | ------- | 
+| Average Retrieval Time Without Overhead | 0.46s   |
+| Average Retrieval Time With Overhead    | 2.45s   | 
+| Average Precision@5                     | 48.96%  |
+| Average Precision@10                    | 48.42%  |
+| Average Precision@15                    | 48.75%  |
+| Average Precision@20                    | 48.64%  |
 
 ### 3.2. All Test Images
 
-| Metric                      |  Value  | 
-| --------------------------- | ------- | 
-| Query Time with No Overhead | 0.51s   |
-| Query Time with Overhead    | 2.67s   | 
-| Precision@5                 | 49.14%  |
-| Precision@10                | 49.10%  |
-| Precision@15                | 48.77%  |
-| Precision@20                | 48.49%  |
+| Metric                                  |  Value  | 
+| --------------------------------------- | ------- | 
+| Average Retrieval Time Without Overhead | 0.51s   |
+| Average Retrieval Time With Overhead    | 2.67s   | 
+| Average Precision@5                     | 49.14%  |
+| Average Precision@10                    | 49.10%  |
+| Average Precision@15                    | 48.77%  |
+| Average Precision@20                    | 48.49%  |
 
 [1]: https://enricopal.github.io/publications/Semantic%20Similarity%20between%20Images.pdf
 [2]: http://w3.usf.edu/FreeAssociation/
