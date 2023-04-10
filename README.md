@@ -9,8 +9,8 @@ This repository contains the implementation of semantical similarity between ima
 The data for word assocations is taken from the follwing site:
 
 > [**University of South Florida Free Association Norms**][2]  
-> Douglas L. Nelson and Cathy L. McEvoy - University of South Florida
-> Thomas A. Schreiber - University of Kansas
+> Douglas L. Nelson and Cathy L. McEvoy - University of South Florida.
+> Thomas A. Schreiber - University of Kansas.
 
 If you use this code, please cite the above resources.
 
