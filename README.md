@@ -17,6 +17,10 @@ If you use this code, please cite the above resources.
 The rest of the repository deals with Content-Based Image Retrieval (CBIR) on the CIFAR-100 dataset. Additionally, other insights have been derived from the Word Associations Network.
 
 ## 1. Quickrun
+Before running any scripts ensure that you have the required dependencies. To install the dependencies, use:
+```
+bash ./install_dependencies.sh
+```
 ### 1.1. All Test Results
 For computing the test results for all 10000 test images in the CIFAR-100 dataset, use:
 ```
