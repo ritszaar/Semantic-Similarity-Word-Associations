@@ -120,6 +120,7 @@ The retrieval performance of the model is evaluted.
 
 | Metric                            |  Value  | 
 | --------------------------------- | ------- | 
+| Retrieval Time                    | 4.16ms  |
 | mAP@1                             | 99.98%  |
 | mAP@5                             | 59.51%  |
 | mAP@10                            | 53.22%  |
@@ -130,6 +131,23 @@ The retrieval performance of the model is evaluted.
 | mAHP@10                           | 81.13%  |
 | mAHP@15                           | 80.36%  |
 | mAHP@250                          | 81.31%  |
+
+### 3.4. SWarup Method 2
+
+| Metric                            |  Value  | 
+| --------------------------------- | ------- | 
+| Retrieval Time                    | 9.51ms  |
+| mAP@1                             | 99.98%  |
+| mAP@5                             | 59.07%  |
+| mAP@10                            | 52.62%  |
+| mAP@15                            | 50.02%  |
+| mAP@250                           | 20.71%  |
+| mAHP@1                            | 99.99%  |
+| mAHP@5                            | 82.93%  |
+| mAHP@10                           | 80.66%  |
+| mAHP@15                           | 79.83%  |
+| mAHP@250                          | 77.35%  |
+
 
 [1]: https://enricopal.github.io/publications/Semantic%20Similarity%20between%20Images.pdf
 [2]: http://w3.usf.edu/FreeAssociation/
