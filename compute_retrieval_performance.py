@@ -46,10 +46,12 @@ with open("class_embeddings.pickle", "rb") as f:
 topK = 20
     
 def evaluate_predictions(train_data, test_data, test_results):
+    avg_precision_at_1       = 0
     avg_precision_at_5       = 0
     avg_precision_at_10      = 0
     avg_precision_at_15      = 0
     avg_precision_at_20      = 0
+    h_avg_precision_at_1     = 0
     h_avg_precision_at_5     = 0
     h_avg_precision_at_10    = 0
     h_avg_precision_at_15    = 0
@@ -78,10 +80,12 @@ def evaluate_predictions(train_data, test_data, test_results):
 
         if sum(precisions[0:20]) != 0:
             n = n + 1
+            avg_precision_at_1       += sum(precisions[0:1])
             avg_precision_at_5       += sum(precisions[0:5])/5
             avg_precision_at_10      += sum(precisions[0:10])/10
             avg_precision_at_15      += sum(precisions[0:15])/15
             avg_precision_at_20      += sum(precisions[0:20])/20
+            h_avg_precision_at_1     += sum(h_precisions[0:1])
             h_avg_precision_at_5     += sum(h_precisions[0:5])/5
             h_avg_precision_at_10    += sum(h_precisions[0:10])/10
             h_avg_precision_at_15    += sum(h_precisions[0:15])/15
@@ -89,10 +93,12 @@ def evaluate_predictions(train_data, test_data, test_results):
             avg_preprocessing_time   += test_results[i][2]
             avg_total_retrieval_time += test_results[i][3]
 
+    avg_precision_at_1       /= n
     avg_precision_at_5       /= n
     avg_precision_at_10      /= n
     avg_precision_at_15      /= n
     avg_precision_at_20      /= n
+    h_avg_precision_at_1     /= n
     h_avg_precision_at_5     /= n
     h_avg_precision_at_10    /= n
     h_avg_precision_at_15    /= n
@@ -104,10 +110,12 @@ def evaluate_predictions(train_data, test_data, test_results):
     stat.field_names = ["\033[93mMetric\033[0m", "\033[93mValue\033[0m"]
     stat.add_row(["Retrieval Time (without overhead)", "{:.2f}s".format(avg_total_retrieval_time - avg_preprocessing_time)])
     stat.add_row(["Retrieval Time (with overhead)", "{:.2f}s".format(avg_total_retrieval_time)])
+    stat.add_row(["mAP@1",  "{:.2f}%".format(avg_precision_at_1  * 100)])
     stat.add_row(["mAP@5",  "{:.2f}%".format(avg_precision_at_5  * 100)])
     stat.add_row(["mAP@10", "{:.2f}%".format(avg_precision_at_10 * 100)])
     stat.add_row(["mAP@15", "{:.2f}%".format(avg_precision_at_15 * 100)])
     stat.add_row(["mAP@20", "{:.2f}%".format(avg_precision_at_20 * 100)])
+    stat.add_row(["mAHP@1",  "{:.2f}%".format(h_avg_precision_at_1  * 100)])
     stat.add_row(["mAHP@5",  "{:.2f}%".format(h_avg_precision_at_5  * 100)])
     stat.add_row(["mAHP@10", "{:.2f}%".format(h_avg_precision_at_10 * 100)])
     stat.add_row(["mAHP@15", "{:.2f}%".format(h_avg_precision_at_15 * 100)])

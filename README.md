@@ -88,10 +88,12 @@ The retrieval performance of the model is evaluted.
 | --------------------------------- | ------- | 
 | Retrieval Time (without overhead) | 0.46s   |
 | Retrieval Time (with overhead)    | 2.45s   | 
+| mAP@1                             | 50.39%  |
 | mAP@5                             | 48.96%  |
 | mAP@10                            | 48.42%  |
 | mAP@15                            | 48.75%  |
 | mAP@20                            | 48.64%  |
+| mAHP@5                            | 64.99%  |
 | mAHP@5                            | 64.27%  |
 | mAHP@10                           | 63.93%  |
 | mAHP@15                           | 64.03%  |
@@ -102,11 +104,13 @@ The retrieval performance of the model is evaluted.
 | Metric                            |  Value  | 
 | --------------------------------- | ------- | 
 | Retrieval Time (without overhead) | 0.51s   |
-| Retrieval Time (with overhead)    | 2.67s   | 
+| Retrieval Time (with overhead)    | 2.67s   |
+| mAP@1                             | 50.65%  |
 | mAP@5                             | 49.14%  |
 | mAP@10                            | 49.10%  |
 | mAP@15                            | 48.77%  |
 | mAP@20                            | 48.49%  |
+| mAHP@1                            | 66.14%  |
 | mAHP@5                            | 65.07%  |
 | mAHP@10                           | 65.12%  |
 | mAHP@15                           | 64.83%  |

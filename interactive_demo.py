@@ -294,31 +294,34 @@ def evaluate_predictions(train_data, test_data, index, predictions):
     print()
     print(pred_table, end='\n\n')
 
-    print(precisions)
+    precision_at_1    = sum(precisions[0:1])
     precision_at_5    = sum(precisions[0:5])/5
     precision_at_10   = sum(precisions[0:10])/10
     precision_at_15   = sum(precisions[0:15])/15
     precision_at_20   = sum(precisions[0:20])/20
+    h_precision_at_1    = sum(precisions[0:1])
     h_precision_at_5  = sum(h_precisions[0:5])/5
     h_precision_at_10 = sum(h_precisions[0:10])/10
     h_precision_at_15 = sum(h_precisions[0:15])/15
     h_precision_at_20 = sum(h_precisions[0:20])/20
-    return precision_at_5, precision_at_10, precision_at_15, precision_at_20, h_precision_at_5, h_precision_at_10, h_precision_at_15, h_precision_at_20
+    return precision_at_1, precision_at_5, precision_at_10, precision_at_15, precision_at_20, h_precision_at_1, h_precision_at_5, h_precision_at_10, h_precision_at_15, h_precision_at_20
 
 while True:
     index = int(input("Enter index of a test image [0-9999] [-1 to exit]: "))
     if index >= 0 and index < 10000:
         predictions, paths, preprocessing_time, total_query_time = model.predict(test_data.dataset[index]["img"], topK)
-        precision_at_5, precision_at_10, precision_at_15, precision_at_20, h_precision_at_5, h_precision_at_10, h_precision_at_15, h_precision_at_20 = evaluate_predictions(train_data, test_data, index, predictions)
+        precision_at_1, precision_at_5, precision_at_10, precision_at_15, precision_at_20, h_precision_at_1, h_precision_at_5, h_precision_at_10, h_precision_at_15, h_precision_at_20 = evaluate_predictions(train_data, test_data, index, predictions)
         stat = prettytable.PrettyTable()
         stat.title = "\033[1m\033[92mRetrieval Statistics\033[0m"
         stat.field_names = ["\033[93mMetric\033[0m", "\033[93mValue\033[0m"]
         stat.add_row(["Retrieval Time (without overhead)", "{:.2f}s".format(total_query_time - preprocessing_time)])
         stat.add_row(["Retrieval Time (with overhead)", "{:.2f}s".format(total_query_time)])
+        stat.add_row(["AP@1",  "{:.2f}%".format(precision_at_1  * 100)])
         stat.add_row(["AP@5",  "{:.2f}%".format(precision_at_5  * 100)])
         stat.add_row(["AP@10", "{:.2f}%".format(precision_at_10 * 100)])
         stat.add_row(["AP@15", "{:.2f}%".format(precision_at_15 * 100)])
         stat.add_row(["AP@20", "{:.2f}%".format(precision_at_20 * 100)])
+        stat.add_row(["AHP@1",  "{:.2f}%".format(h_precision_at_1  * 100)])
         stat.add_row(["AHP@5",  "{:.2f}%".format(h_precision_at_5  * 100)])
         stat.add_row(["AHP@10", "{:.2f}%".format(h_precision_at_10 * 100)])
         stat.add_row(["AHP@15", "{:.2f}%".format(h_precision_at_15 * 100)])
