@@ -2,6 +2,7 @@ import sys
 import pickle
 import datasets
 import prettytable
+import numpy as np
 
 class CIFARData:
     def __init__(self, which="train"):
@@ -37,6 +38,11 @@ class CIFARData:
     def get_fine_label_by_index(self, index):
         return self.id2fine_label[self.dataset[index]["fine_label"]]
     
+embeddings = None
+with open("class_embeddings.pickle", "rb") as f:
+    data = pickle.load(f)
+    embeddings = np.array(data["embedding"])
+    
 topK = 20
     
 def evaluate_predictions(train_data, test_data, test_results):
@@ -44,23 +50,31 @@ def evaluate_predictions(train_data, test_data, test_results):
     avg_precision_at_10      = 0
     avg_precision_at_15      = 0
     avg_precision_at_20      = 0
+    h_avg_precision_at_5     = 0
+    h_avg_precision_at_10    = 0
+    h_avg_precision_at_15    = 0
+    h_avg_precision_at_20    = 0
     avg_preprocessing_time   = 0
     avg_total_retrieval_time = 0
     n = 0
     for i in range(len(test_results)):
         predictions = test_results[i][0]
         precisions = []
+        h_precisions = []
         target_fine_label = test_data.id2fine_label[test_data.dataset[i]["fine_label"]]
         target_coarse_label = test_data.id2coarse_label[test_data.dataset[i]["coarse_label"]]
+        target_fine_label_id = test_data.dataset[i]["fine_label"]
 
         for j in range(topK):
             pred_fine_label = train_data.id2fine_label[train_data.dataset[predictions[j]]["fine_label"]]
             pred_coarse_label = train_data.id2coarse_label[train_data.dataset[predictions[j]]["coarse_label"]]
+            pred_fine_label_id = train_data.dataset[predictions[j]]["fine_label"]
             precisions.append(0)
             if target_fine_label == pred_fine_label:
                 precisions[j] = 1
             elif target_coarse_label == pred_coarse_label:
                 precisions[j] = 0.5
+            h_precisions.append(np.dot(embeddings[target_fine_label_id], embeddings[pred_fine_label_id]))
 
         if sum(precisions[0:20]) != 0:
             n = n + 1
@@ -68,6 +82,10 @@ def evaluate_predictions(train_data, test_data, test_results):
             avg_precision_at_10      += sum(precisions[0:10])/10
             avg_precision_at_15      += sum(precisions[0:15])/15
             avg_precision_at_20      += sum(precisions[0:20])/20
+            h_avg_precision_at_5       += sum(h_precisions[0:5])/5
+            h_avg_precision_at_10      += sum(h_precisions[0:10])/10
+            h_avg_precision_at_15      += sum(h_precisions[0:15])/15
+            h_avg_precision_at_20      += sum(h_precisions[0:20])/20
             avg_preprocessing_time   += test_results[i][2]
             avg_total_retrieval_time += test_results[i][3]
 
@@ -75,17 +93,25 @@ def evaluate_predictions(train_data, test_data, test_results):
     avg_precision_at_10      /= n
     avg_precision_at_15      /= n
     avg_precision_at_20      /= n
+    h_avg_precision_at_5     /= n
+    h_avg_precision_at_10    /= n
+    h_avg_precision_at_15    /= n
+    h_avg_precision_at_20    /= n
     avg_preprocessing_time   /= n
     avg_total_retrieval_time /= n
     stat = prettytable.PrettyTable()
     stat.title = "\033[1m\033[92mOverall Retrieval Performance\033[0m"
     stat.field_names = ["\033[93mMetric\033[0m", "\033[93mValue\033[0m"]
-    stat.add_row(["Average Retrieval Time Without Overhead", "{:.2f}s".format(avg_total_retrieval_time - avg_preprocessing_time)])
-    stat.add_row(["Average Retrieval Time With Overhead", "{:.2f}s".format(avg_total_retrieval_time)])
-    stat.add_row(["Average Precision@5",  "{:.2f}%".format(avg_precision_at_5  * 100)])
-    stat.add_row(["Average Precision@10", "{:.2f}%".format(avg_precision_at_10 * 100)])
-    stat.add_row(["Average Precision@15", "{:.2f}%".format(avg_precision_at_15 * 100)])
-    stat.add_row(["Average Precision@20", "{:.2f}%".format(avg_precision_at_20 * 100)])
+    stat.add_row(["Retrieval Time (without overhead)", "{:.2f}s".format(avg_total_retrieval_time - avg_preprocessing_time)])
+    stat.add_row(["Retrieval Time (with overhead)", "{:.2f}s".format(avg_total_retrieval_time)])
+    stat.add_row(["mAP@5",  "{:.2f}%".format(avg_precision_at_5  * 100)])
+    stat.add_row(["mAP@10", "{:.2f}%".format(avg_precision_at_10 * 100)])
+    stat.add_row(["mAP@15", "{:.2f}%".format(avg_precision_at_15 * 100)])
+    stat.add_row(["mAP@20", "{:.2f}%".format(avg_precision_at_20 * 100)])
+    stat.add_row(["mAHP@5",  "{:.2f}%".format(h_avg_precision_at_5  * 100)])
+    stat.add_row(["mAHP@10", "{:.2f}%".format(h_avg_precision_at_10 * 100)])
+    stat.add_row(["mAHP@15", "{:.2f}%".format(h_avg_precision_at_15 * 100)])
+    stat.add_row(["mAHP@20", "{:.2f}%".format(h_avg_precision_at_20 * 100)])
     stat.align["\033[93mMetric\033[0m"] = "l"
     stat.align["\033[93mValue\033[0m"] = "l"
     print()

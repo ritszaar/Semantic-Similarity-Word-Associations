@@ -241,6 +241,11 @@ class CIFARData:
     def get_fine_label_by_index(self, index):
         return self.id2fine_label[self.dataset[index]["fine_label"]]
     
+embeddings = None
+with open("class_embeddings.pickle", "rb") as f:
+    data = pickle.load(f)
+    embeddings = np.array(data["embedding"])
+    
 train_data = CIFARData("train")
 test_data  = CIFARData("test")
 model = WordAssociationsNetwork()
@@ -250,8 +255,10 @@ print()
 
 def evaluate_predictions(train_data, test_data, index, predictions):
     precisions = []
+    h_precisions = []
     target_fine_label = test_data.id2fine_label[test_data.dataset[index]["fine_label"]]
     target_coarse_label = test_data.id2coarse_label[test_data.dataset[index]["coarse_label"]]
+    target_fine_label_id = test_data.dataset[index]["fine_label"]
 
     test_table = prettytable.PrettyTable()
     test_table.title = "\033[1m\033[92mTest Image Labels\033[0m"
@@ -271,12 +278,14 @@ def evaluate_predictions(train_data, test_data, index, predictions):
     for i in range(topK):
         pred_fine_label = train_data.id2fine_label[train_data.dataset[predictions[i]]["fine_label"]]
         pred_coarse_label = train_data.id2coarse_label[train_data.dataset[predictions[i]]["coarse_label"]]
+        pred_fine_label_id = train_data.dataset[predictions[i]]["fine_label"]
         pred_table.add_row([i + 1, predictions[i], pred_fine_label, pred_coarse_label])
         precisions.append(0)
         if target_fine_label == pred_fine_label:
             precisions[i] = 1
         elif target_coarse_label == pred_coarse_label:
             precisions[i] = 0.5
+        h_precisions.append(np.dot(embeddings[target_fine_label_id], embeddings[pred_fine_label_id]))
 
     pred_table.align["\033[93mRank\033[0m"] = "l"
     pred_table.align["\033[93mImage ID\033[0m"] = "l"
@@ -285,26 +294,34 @@ def evaluate_predictions(train_data, test_data, index, predictions):
     print()
     print(pred_table, end='\n\n')
 
-    precision_at_5 = sum(precisions[0:5])/5
-    precision_at_10 = sum(precisions[0:10])/10
-    precision_at_15 = sum(precisions[0:15])/15
-    precision_at_20 = sum(precisions[0:20])/20
-    return precision_at_5, precision_at_10, precision_at_15, precision_at_20
+    precision_at_5    = sum(precisions[0:5])/5
+    precision_at_10   = sum(precisions[0:10])/10
+    precision_at_15   = sum(precisions[0:15])/15
+    precision_at_20   = sum(precisions[0:20])/20
+    h_precision_at_5  = sum(h_precisions[0:5])/5
+    h_precision_at_10 = sum(h_precisions[0:10])/10
+    h_precision_at_15 = sum(h_precisions[0:15])/15
+    h_precision_at_20 = sum(h_precisions[0:20])/20
+    return precision_at_5, precision_at_10, precision_at_15, precision_at_20, h_precision_at_5, h_precision_at_10, h_precision_at_15, h_precision_at_20
 
 while True:
     index = int(input("Enter index of a test image [0-9999] [-1 to exit]: "))
     if index >= 0 and index < 10000:
         predictions, paths, preprocessing_time, total_query_time = model.predict(test_data.dataset[index]["img"], topK)
-        precision_at_5, precision_at_10, precision_at_15, precision_at_20 = evaluate_predictions(train_data, test_data, index, predictions)
+        precision_at_5, precision_at_10, precision_at_15, precision_at_20, h_precision_at_5, h_precision_at_10, h_precision_at_15, h_precision_at_20 = evaluate_predictions(train_data, test_data, index, predictions)
         stat = prettytable.PrettyTable()
         stat.title = "\033[1m\033[92mRetrieval Statistics\033[0m"
         stat.field_names = ["\033[93mMetric\033[0m", "\033[93mValue\033[0m"]
-        stat.add_row(["Retrieval Time Without Overhead", "{:.2f}s".format(total_query_time - preprocessing_time)])
-        stat.add_row(["Retrieval Time With Overhead", "{:.2f}s".format(total_query_time)])
-        stat.add_row(["Precision@5",  "{:.2f}%".format(precision_at_5  * 100)])
-        stat.add_row(["Precision@10", "{:.2f}%".format(precision_at_10 * 100)])
-        stat.add_row(["Precision@15", "{:.2f}%".format(precision_at_15 * 100)])
-        stat.add_row(["Precision@20", "{:.2f}%".format(precision_at_20 * 100)])
+        stat.add_row(["Retrieval Time (without overhead)", "{:.2f}s".format(total_query_time - preprocessing_time)])
+        stat.add_row(["Retrieval Time (with overhead)", "{:.2f}s".format(total_query_time)])
+        stat.add_row(["AP@5",  "{:.2f}%".format(precision_at_5  * 100)])
+        stat.add_row(["AP@10", "{:.2f}%".format(precision_at_10 * 100)])
+        stat.add_row(["AP@15", "{:.2f}%".format(precision_at_15 * 100)])
+        stat.add_row(["AP@20", "{:.2f}%".format(precision_at_20 * 100)])
+        stat.add_row(["AHP@5",  "{:.2f}%".format(h_precision_at_5  * 100)])
+        stat.add_row(["AHP@10", "{:.2f}%".format(h_precision_at_10 * 100)])
+        stat.add_row(["AHP@15", "{:.2f}%".format(h_precision_at_15 * 100)])
+        stat.add_row(["AHP@20", "{:.2f}%".format(h_precision_at_20 * 100)])
         stat.align["\033[93mMetric\033[0m"] = "l"
         stat.align["\033[93mValue\033[0m"] = "l"
         print()

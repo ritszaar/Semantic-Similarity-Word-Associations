@@ -76,25 +76,33 @@ The retrieval performance of the model is evaluted.
 ## 3. Model Performance
 ### 3.1. 500 Test Images
 
-| Metric                                  |  Value  | 
-| --------------------------------------- | ------- | 
-| Average Retrieval Time Without Overhead | 0.46s   |
-| Average Retrieval Time With Overhead    | 2.45s   | 
-| Average Precision@5                     | 48.96%  |
-| Average Precision@10                    | 48.42%  |
-| Average Precision@15                    | 48.75%  |
-| Average Precision@20                    | 48.64%  |
+| Metric                            |  Value  | 
+| --------------------------------- | ------- | 
+| Retrieval Time (without overhead) | 0.46s   |
+| Retrieval Time (with overhead)    | 2.45s   | 
+| mAP@5                             | 48.96%  |
+| mAP@10                            | 48.42%  |
+| mAP@15                            | 48.75%  |
+| mAP@20                            | 48.64%  |
+| mAHP@5                            | 64.27%  |
+| mAHP@10                           | 63.93%  |
+| mAHP@15                           | 64.03%  |
+| mAHP@20                           | 63.95%  |
 
 ### 3.2. All Test Images
 
-| Metric                                  |  Value  | 
-| --------------------------------------- | ------- | 
-| Average Retrieval Time Without Overhead | 0.51s   |
-| Average Retrieval Time With Overhead    | 2.67s   | 
-| Average Precision@5                     | 49.14%  |
-| Average Precision@10                    | 49.10%  |
-| Average Precision@15                    | 48.77%  |
-| Average Precision@20                    | 48.49%  |
+| Metric                            |  Value  | 
+| --------------------------------- | ------- | 
+| Retrieval Time (without overhead) | 0.51s   |
+| Retrieval Time (with overhead)    | 2.67s   | 
+| mAP@5                             | 49.14%  |
+| mAP@10                            | 49.10%  |
+| mAP@15                            | 48.77%  |
+| mAP@20                            | 48.49%  |
+| mAHP@5                            | 65.07%  |
+| mAHP@10                           | 65.12%  |
+| mAHP@15                           | 64.83%  |
+| mAHP@20                           | 64.50%  |
 
 [1]: https://enricopal.github.io/publications/Semantic%20Similarity%20between%20Images.pdf
 [2]: http://w3.usf.edu/FreeAssociation/
