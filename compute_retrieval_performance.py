@@ -82,10 +82,10 @@ def evaluate_predictions(train_data, test_data, test_results):
             avg_precision_at_10      += sum(precisions[0:10])/10
             avg_precision_at_15      += sum(precisions[0:15])/15
             avg_precision_at_20      += sum(precisions[0:20])/20
-            h_avg_precision_at_5       += sum(h_precisions[0:5])/5
-            h_avg_precision_at_10      += sum(h_precisions[0:10])/10
-            h_avg_precision_at_15      += sum(h_precisions[0:15])/15
-            h_avg_precision_at_20      += sum(h_precisions[0:20])/20
+            h_avg_precision_at_5     += sum(h_precisions[0:5])/5
+            h_avg_precision_at_10    += sum(h_precisions[0:10])/10
+            h_avg_precision_at_15    += sum(h_precisions[0:15])/15
+            h_avg_precision_at_20    += sum(h_precisions[0:20])/20
             avg_preprocessing_time   += test_results[i][2]
             avg_total_retrieval_time += test_results[i][3]
 
@@ -139,4 +139,3 @@ train_data = CIFARData("train")
 test_data  = CIFARData("test")
 
 evaluate_predictions(train_data, test_data, test_results)
-

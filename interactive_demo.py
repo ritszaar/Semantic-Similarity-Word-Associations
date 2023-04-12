@@ -294,6 +294,7 @@ def evaluate_predictions(train_data, test_data, index, predictions):
     print()
     print(pred_table, end='\n\n')
 
+    print(precisions)
     precision_at_5    = sum(precisions[0:5])/5
     precision_at_10   = sum(precisions[0:10])/10
     precision_at_15   = sum(precisions[0:15])/15
