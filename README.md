@@ -41,6 +41,10 @@ For an interactive demo, use:
 ```
 
 ## 2. Longrun
+Before running any scripts ensure that you have the required dependencies. To install the dependencies, use:
+```
+bash ./install_dependencies.sh
+```
 ### 2.1. Compute Image-Word Associations
 Every 32x32 image in the CIFAR-100 train dataset is cubic-interpolated to 224x224. The interpolated image is passed through the ResNet-50 model. The top 10 predictions of model along with its fine label and coarse label as provided by the dataset itself are saved in `Base Associations`.
 ```
