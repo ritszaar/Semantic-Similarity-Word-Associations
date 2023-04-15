@@ -1,7 +1,8 @@
 import re
+import sys
 import pickle
 
-topIWK = 4
+topIWK = int(sys.argv[1]) if len(sys.argv) > 1 else 4
 topWWK = 4
 
 def load_data():

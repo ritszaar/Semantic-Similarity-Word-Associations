@@ -86,67 +86,35 @@ The retrieval performance of the model is evaluted.
 
 | Metric                            |  Value  | 
 | --------------------------------- | ------- | 
-| Retrieval Time (without overhead) | 0.46s   |
-| Retrieval Time (with overhead)    | 2.45s   | 
-| mAP@1                             | 50.39%  |
-| mAP@5                             | 48.96%  |
-| mAP@10                            | 48.42%  |
-| mAP@15                            | 48.75%  |
-| mAP@20                            | 48.64%  |
-| mAHP@5                            | 64.99%  |
-| mAHP@5                            | 64.27%  |
-| mAHP@10                           | 63.93%  |
-| mAHP@15                           | 64.03%  |
-| mAHP@20                           | 63.95%  |
+| Retrieval Time (without overhead) | 0.50s   |
+| Retrieval Time (with overhead)    | 2.71s   | 
+| mAP@1                             | 52.10%  |
+| mAP@5                             | 53.47%  |
+| mAP@10                            | 52.12%  |
+| mAP@15                            | 51.56%  |
+| mAP@20                            | 51.11%  |
+| mAHP@1                            | 59.51%  |
+| mAHP@5                            | 60.27%  |
+| mAHP@10                           | 59.83%  |
+| mAHP@15                           | 59.65%  |
+| mAHP@20                           | 59.44%  |
 
 ### 3.2. All Test Images
 
 | Metric                            |  Value  | 
 | --------------------------------- | ------- | 
-| Retrieval Time (without overhead) | 0.51s   |
+| Retrieval Time (without overhead) | 0.50s   |
 | Retrieval Time (with overhead)    | 2.67s   |
-| mAP@1                             | 50.65%  |
-| mAP@5                             | 49.14%  |
-| mAP@10                            | 49.10%  |
-| mAP@15                            | 48.77%  |
-| mAP@20                            | 48.49%  |
-| mAHP@1                            | 66.14%  |
-| mAHP@5                            | 65.07%  |
-| mAHP@10                           | 65.12%  |
-| mAHP@15                           | 64.83%  |
-| mAHP@20                           | 64.50%  |
-
-### 3.3. SWarup Method 1
-
-| Metric                            |  Value  | 
-| --------------------------------- | ------- | 
-| Retrieval Time                    | 4.16ms  |
-| mAP@1                             | 99.98%  |
-| mAP@5                             | 59.51%  |
-| mAP@10                            | 53.22%  |
-| mAP@15                            | 50.74%  |
-| mAP@250                           | 22.60%  |
-| mAHP@1                            | 99.99%  |
-| mAHP@5                            | 83.30%  |
-| mAHP@10                           | 81.13%  |
-| mAHP@15                           | 80.36%  |
-| mAHP@250                          | 81.31%  |
-
-### 3.4. SWarup Method 2
-
-| Metric                            |  Value  | 
-| --------------------------------- | ------- | 
-| Retrieval Time                    | 9.51ms  |
-| mAP@1                             | 99.98%  |
-| mAP@5                             | 59.07%  |
-| mAP@10                            | 52.62%  |
-| mAP@15                            | 50.02%  |
-| mAP@250                           | 20.71%  |
-| mAHP@1                            | 99.99%  |
-| mAHP@5                            | 82.93%  |
-| mAHP@10                           | 80.66%  |
-| mAHP@15                           | 79.83%  |
-| mAHP@250                          | 77.35%  |
+| mAP@1                             | 52.07%  |
+| mAP@5                             | 53.04%  |
+| mAP@10                            | 52.57%  |
+| mAP@15                            | 52.09%  |
+| mAP@20                            | 51.70%  |
+| mAHP@1                            | 59.93%  |
+| mAHP@5                            | 60.29%  |
+| mAHP@10                           | 59.88%  |
+| mAHP@15                           | 59.64%  |
+| mAHP@20                           | 59.42%  |
 
 
 [1]: https://enricopal.github.io/publications/Semantic%20Similarity%20between%20Images.pdf

@@ -17,9 +17,9 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-topIWK = 4
+topIWK = int(sys.argv[2]) if len(sys.argv) > 2 else 4
 topWWK = 4
-topK = 20
+topK = 250
 
 def connect():
     print("Connecting to PostgreSQL database...")
@@ -312,24 +312,18 @@ test_results = []
 model.predict(test_data.dataset[0]["img"], topK)
 
 print("\nComputing partial test results...\n")
+pickle_path = "partial_test_results_{}.pickle".format(sys.argv[2]) if len(sys.argv) > 2 else "partial_test_results.pickle"
 
 for i in range(n):
     predictions, paths, preprocessing_time, total_query_time = model.predict(test_data.dataset[i]["img"], topK)
-    test_results.append((predictions, paths, preprocessing_time, total_query_time))
+    test_results.append((predictions, preprocessing_time, total_query_time))
     if (i + 1) % 10 == 0:
         print("\nComputed partial test results ({}/{}).\n".format(i + 1, n))   
-
-    if (i + 1) % 1000 == 0:
-        data = dict()
-        data["test_results"] = test_results
-        print('Dumping data in "partial_test_results.pickle"...')
-        with open("partial_test_results.pickle", "wb") as f:
-            pickle.dump(data, file=f)
-            print('Successfully dumped data in "partial_test_results.pickle" ({}/{}).\n\n'.format(i + 1, n))
+        
 
 data = dict()
 data["test_results"] = test_results
-print('Dumping data in "partial_test_results.pickle"...')
-with open("partial_test_results.pickle", "wb") as f:
+print('\nDumping data in "{}"...'.format(pickle_path))
+with open(pickle_path, "wb") as f:
     pickle.dump(data, file=f)
-    print('Successfully dumped data in "partial_test_results.pickle" ({}/{}).\n\n'.format(i + 1, n))
+    print('Successfully dumped data in "{}" ({}/{}).\n\n'.format(pickle_path, i + 1, n))

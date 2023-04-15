@@ -125,6 +125,106 @@ def evaluate_predictions(train_data, test_data, test_results):
     print()
     print(stat, end='\n\n')
 
+def compute_average_precisions(relevances, k_list):
+    precisions = [0] * topK
+    precisions[0] = relevances[0]
+    for i in range(1, topK):
+        precisions[i] = precisions[i - 1] + relevances[i]
+    for i in range(topK):
+        precisions[i] = 1.00 * precisions[i]/ (1.00 * i + 1)
+
+    average_precisions = [0] * len(k_list)
+    dens = [0] * len(k_list)
+
+    for i in range(topK):
+        if precisions[i] > 0:
+            for j in range(len(k_list)):
+                if i <= k_list[j] - 1:
+                    average_precisions[j] += precisions[i]
+                    dens[j] += 1
+
+    for i in range(len(k_list)):
+        if dens[i] > 0:
+            average_precisions[i] /= dens[i]
+
+    # for i in range(1, topK):
+    #     average_precisions[i] = average_precisions[i - 1] + precisions[i]
+    # for i in range(topK):
+    #     average_precisions[i] = average_precisions[i]/(i + 1)
+
+    return average_precisions
+
+def compute_metrics(pickle_path, train_data, test_data, embeddings, k_list=[1, 5, 10, 15, 20]):
+    test_results = None
+    with open(pickle_path, "rb") as f:
+        data = pickle.load(f)
+        test_results = data["test_results"]
+
+    n1 = 0
+    n2 = 0
+    mean_rtno = 0
+    mean_rto = 0
+    mean_average_precisions = [0] * len(k_list)
+    mean_average_hierarchical_precisions = [0] * len(k_list)
+    for i in range(len(test_results)):
+        predictions = test_results[i][0]
+        if len(sys.argv) > 1 and sys.argv[1] == "--partial":
+            mean_rtno += test_results[i][3] - test_results[i][2]
+            mean_rto += test_results[i][3]
+        else:
+            mean_rtno += test_results[i][3] - test_results[i][2]
+            mean_rto += test_results[i][3]
+        target_fine_label = test_data.id2fine_label[test_data.dataset[i]["fine_label"]]
+        # target_coarse_label = test_data.id2coarse_label[test_data.dataset[i]["coarse_label"]]
+        target_fine_label_id = test_data.dataset[i]["fine_label"]
+
+        relevances = []
+        hierarchical_relevances = []
+        for j in range(topK):
+            pred_fine_label = train_data.id2fine_label[train_data.dataset[predictions[j]]["fine_label"]]
+            pred_coarse_label = train_data.id2coarse_label[train_data.dataset[predictions[j]]["coarse_label"]]
+            pred_fine_label_id = train_data.dataset[predictions[j]]["fine_label"]
+            relevances.append(0)
+            if target_fine_label == pred_fine_label:
+                relevances[j] = 1
+            # elif target_coarse_label == pred_coarse_label:
+            #     relevances[j] = 0.5
+            hierarchical_relevances.append(np.dot(embeddings[target_fine_label_id], embeddings[pred_fine_label_id]))
+
+        average_precisions = compute_average_precisions(relevances, k_list)
+        average_hierarchical_precisions = compute_average_precisions(hierarchical_relevances, k_list)
+        if sum(relevances[0:20]) > 0:
+            n1 = n1 + 1
+            mean_average_precisions = [mean_average_precisions[i] + average_precisions[i] for i in range(len(k_list))]
+        if sum(hierarchical_relevances[0:20]) > 0:
+            n2 = n2 + 1
+            mean_average_hierarchical_precisions = [mean_average_hierarchical_precisions[i] + average_hierarchical_precisions[i] for i in range(len(k_list))]
+
+    
+    mean_rtno = mean_rtno / len(test_results)
+    mean_rto = mean_rto / len(test_results)
+    mean_average_precisions = [mean_average_precisions[i]/n1 for i in range(len(k_list))]
+    mean_average_hierarchical_precisions = [mean_average_hierarchical_precisions[i]/n2 for i in range(len(k_list))]
+    stat = prettytable.PrettyTable()
+    stat.title = "\033[1m\033[92mOverall Retrieval Performance\033[0m"
+    stat.field_names = ["\033[93mMetric\033[0m", "\033[93mValue\033[0m"]
+    stat.add_row(["Retrieval Time (without overhead)", "{:.2f}s".format(mean_rtno)])
+    stat.add_row(["Retrieval Time (with overhead)", "{:.2f}s".format(mean_rto)])
+    stat.add_row(["mAP@1",   "{:.2f}%".format(mean_average_precisions[0] * 100)])
+    stat.add_row(["mAP@5",   "{:.2f}%".format(mean_average_precisions[1] * 100)])
+    stat.add_row(["mAP@10",  "{:.2f}%".format(mean_average_precisions[2] * 100)])
+    stat.add_row(["mAP@15",  "{:.2f}%".format(mean_average_precisions[3] * 100)])
+    stat.add_row(["mAP@20",  "{:.2f}%".format(mean_average_precisions[4] * 100)])
+    stat.add_row(["mAHP@1",  "{:.2f}%".format(mean_average_hierarchical_precisions[0]  * 100)])
+    stat.add_row(["mAHP@5",  "{:.2f}%".format(mean_average_hierarchical_precisions[1]  * 100)])
+    stat.add_row(["mAHP@10", "{:.2f}%".format(mean_average_hierarchical_precisions[2]  * 100)])
+    stat.add_row(["mAHP@15", "{:.2f}%".format(mean_average_hierarchical_precisions[3]  * 100)])
+    stat.add_row(["mAHP@20", "{:.2f}%".format(mean_average_hierarchical_precisions[4]  * 100)])
+    stat.align["\033[93mMetric\033[0m"] = "l"
+    stat.align["\033[93mValue\033[0m"] = "l"
+    print()
+    print(stat, end='\n\n')
+
 pickle_path = "test_results.pickle"
 
 if len(sys.argv) > 1:
@@ -146,4 +246,5 @@ test_results = data["test_results"]
 train_data = CIFARData("train")
 test_data  = CIFARData("test")
 
-evaluate_predictions(train_data, test_data, test_results)
+# evaluate_predictions(train_data, test_data, test_results)
+compute_metrics("test_results.pickle", train_data, test_data, embeddings, [1, 5, 10, 15, 20])
